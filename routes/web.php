@@ -18,4 +18,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('print', [PrintController::class, 'index'])->name('print');
+Route::get('print', [PrintController::class, 'index'])->name('print');
