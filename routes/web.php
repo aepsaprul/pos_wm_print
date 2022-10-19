@@ -18,4 +18,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('print', [PrintController::class, 'index'])->name('print');
+Route::get('inventory_invoice', [PrintController::class, 'index'])->name('inventory_invoice');
+Route::get('inventory_invoice/{id}/show', [PrintController::class, 'show'])->name('inventory_invoice.show');
+Route::post('inventory_invoice/print', [PrintController::class, 'print'])->name('inventory_invoice.print');

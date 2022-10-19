@@ -12,34 +12,60 @@ class PrintController extends Controller
 {
   public function index()
   {
-    // $connector = new FilePrintConnector("//192.168.43.37/pos-58-2");
-    // $printer = new Printer($connector);
-    // $printer -> text("terrrrr\n");
-    // $printer -> text("Hello World!\n");
-    // $printer -> text("Hello World!\n");
-    // $printer -> text("Hello World!\n");
-    // $printer -> text("Hello World!\n");
-    // $printer -> text("Hello World!\n");
-    // $printer -> cut();
-    // $printer -> close();
+    
+  }
 
-    // $json = file_get_contents('http://localhost/pos_wm_api/public/api/inventory_invoice/4');
-    $client = new \GuzzleHttp\Client();
-    $request = $client->get('https://warungmitra.com/abcd/api/inventory_invoice/4');
-    $response = $request->getBody();
-    // dd($response);
+  public function show($id)
+  {
+    $invoice_id = $id;
 
-    return response()->json([
-      'data' => $request
-    ]);
+    return view('print', ['invoice_id' => $invoice_id]);
+  }
 
-    // $client = new \GuzzleHttp\Client();
-    // $res = $client->request('GET', 'http://127.0.0.1:8000/api/inventory_invoice/4');
-    // echo $res->getStatusCode();
-    // "200"
-    // echo $res->getHeader('content-type')[0];
-    // 'application/json; charset=utf8'
-    // echo $res->getBody();
-    // {"type":"User"...'
+  public function print(Request $request)
+  {
+    function addSpaces($string = '', $valid_string_length = 0) {
+      if (strlen($string) < $valid_string_length) {
+          $spaces = $valid_string_length - strlen($string);
+          for ($index1 = 1; $index1 <= $spaces; $index1++) {
+              $string = $string . ' ';
+          }
+      }
+    
+      return $string;
+    }
+
+    $connector = new FilePrintConnector("//10.2.1.17/pos-58-2");
+    $printer = new Printer($connector);
+
+    $printer->setJustification(Printer::JUSTIFY_CENTER);
+    $printer->text($request->nama_toko . "\n");
+    $printer->text($request->alamat . "\n");
+    $printer->text("___________________________\n");
+    $printer->setJustification(Printer::JUSTIFY_LEFT);
+    $printer->text("kode: " . $request->kode . "\n");
+    $printer->text("\n");
+
+
+    foreach ($request->produk as $key => $value) {
+      $printer->text($value . "\n");
+      $printer->text(addSpaces('x' . $request->qty[$key], 20) . addSpaces($request->total[$key], 6) . "\n");  
+    }
+
+    $printer->text("\n");
+    $printer->setJustification(Printer::JUSTIFY_RIGHT);
+    $printer->text('Total ' . $request->semua_total);
+    $printer->text("\n");
+    $printer->text("\n");
+    $printer->setJustification(Printer::JUSTIFY_CENTER);
+    $printer->text("Terimakasih Telah Berbelanja\n");
+    $printer->text("Jangan lupa berkunjung kembali\n");
+
+    $printer->text("\n");
+    $printer->text("\n"); 
+    $printer->cut();
+    $printer->close();
+
+    return redirect('/');
   }
 }
